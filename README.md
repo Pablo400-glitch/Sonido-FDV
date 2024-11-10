@@ -217,10 +217,110 @@ En la escena de tus ejercicios 2D incorpora efectos de sonido ajustados a los si
 Crea un grupo SFX en el AudioMixer para eventos:
 - Movimiento del personaje: Crea sonidos específicos para saltos y aterrizajes.
 - Interacción y recolección de objetos: Diseña sonido para la recolección de objetos.
--Indicadores de salud/vida: Diseña un sonido breve y distintivo para cada cambio en el estado de salud (por ejemplo, ganar o perder vida).
+- Indicadores de salud/vida: Diseña un sonido breve y distintivo para cada cambio en el estado de salud (por ejemplo, ganar o perder vida).
 Crea un grupo Ambiente:
 - Crea un sonido de fondo acorde con el ambiente
 - Agrega una zona específica del juego en que el ambiente cambie de sonido
-Crea un grupo para música: Crea un loop de música de fondo acorde al tono del juego
+Crea un grupo para música: 
+- Crea un loop de música de fondo acorde al tono del juego
 
 ### Resolución
+
+He usado el proyecto de Mapa y Físicas en Unity 2D de un entregable Anterior. Dentro de este proyecto he modificado el script de `PlayerMovement` para poder incluir los efectos de sonido cuando ocurran ciertos eventos.
+
+Antes de hablar sobre las modificaciones he tenido que crear los grupos para los diferentes sonidos. Para cada tipo de evento cree un **AudioMixer** distinto, primero cree dos grupos; uno para los eventos llamado `Eventos` y otro para los sonidos de fondo llamado `backgroundSounds`. Dentro del grupo de `Eventos` creo un grupo para cada tipo de evento que se pide y por otro lado dentro del grupo de `backgroundSounds` los sonidos del ambiente y la música del juego.
+
+Cada gameObject de audio tiene su `AudioSource` y a su vez cada `AudioSource` tiene su `AudioMixer` asignado para poder añadir efectos a cada audio.
+
+![Descripción de la imagen](images/9.1.png)
+
+*Figura X: GameObject que contiene los GameObjects con AudioSource*
+
+![Descripción de la imagen](images/9.2.png)
+
+*Figura X: Grupos del AudioMixer*
+
+En el script de Player Movement añadí los atributos de `AudioSource` para cada audio dentro del grupo de eventos. 
+
+Para los eventos de salto y caida del salto he aprovechado el if de cuando el jugador presiona la tecla de salto para reproducir el sonido de salto y cuando cae al suelo se reproduce el sonido de caida al suelo.
+
+Para la recolección de objetos aprovecho el `OnCollisionEnter2D` para que se reproduzca el Sonido cuando el jugador recoge un objeto.
+
+Para los indicadores de Salud y de Vida, solamente creo los gameObjects necesarios para generar el sonido y su `AudioMixer` para controlar los efectos del mismo.
+
+Para el Ambiente y su cambio de sonido lo hice de la siguiente manera. Cree un `BoxCollider2D` para que cuando el jugador este dentro de ese `BoxCollider2D` cambie el clip de audio del ambiente y si el jugador se sale de este collider simplemente se vuelve al clip de audio por defecto.
+
+![Descripción de la imagen](images/9.3.png)
+
+*Figura X: BoxCollider2D para el cambio de clip de Audio*
+
+```csharp
+public class PlayerMovement : MonoBehaviour
+{
+    public AudioSource jumpUpSound;
+    public AudioSource jumpDownSound;
+    public AudioSource objectRecolectionSound;
+    public AudioSource ambientSound;
+    public AudioClip ambient;
+    public AudioClip newAmbient;
+
+    ...
+
+    void FixedUpdate()
+    {
+        Movement();
+    }
+
+    private void Movement()
+    {
+        float moveH = Input.GetAxis("Horizontal");
+
+        if (Input.GetButton("Jump") && !isJumping)
+        {
+            rb2D.AddForce(transform.up * thrust);
+            jumpUpSound.Play();
+            isJumping = true;
+        }
+
+        ...
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Floor") || other.gameObject.CompareTag("Platform"))
+        {
+            jumpDownSound.Play();
+            isJumping = false;
+            rb2D.velocity = new Vector2(rb2D.velocity.x, 0);
+        }
+
+        ...
+
+        if (other.gameObject.CompareTag("Item"))
+        {
+            objectRecolectionSound.Play();
+            AddItem(other);
+        }
+    }
+
+    ...
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("NewAmbient"))
+        {
+            ambientSound.clip = newAmbient;
+            ambientSound.Play();
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("NewAmbient"))
+        {
+            ambientSound.clip = ambient;
+            ambientSound.Play();
+        }
+    }
+}
+```
