@@ -205,9 +205,47 @@ Agregar un sonido de fondo a la escena que se esté reproduciendo continuamente 
 
 ### Enunciado
 
-Crear un script para simular el sonido que hace el cubo-player cuando está movimiento en contacto con el suelo (mecánica para reproducir sonidos de pasos).
+Crear un script para simular el sonido que hace el cubo-player cuando está en movimiento en contacto con el suelo (mecánica para reproducir sonidos de pasos).
 
 ### Resolución
+
+```csharp
+public class FootstepSounds : MonoBehaviour
+{
+    public AudioSource footstepsAudio;
+    private bool isGrounded;
+
+    private void Update()
+    {
+        if (isGrounded && (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D)))
+        {
+            if (!footstepsAudio.isPlaying)
+            {
+                footstepsAudio.Play();
+            }
+        }
+        else
+        {
+            if (footstepsAudio.isPlaying)
+            {
+                footstepsAudio.Stop();
+            }
+        }
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Floor"))
+            isGrounded = true;
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Floor"))
+            isGrounded = false;
+    }
+}
+```
 
 ## Tarea 9
 

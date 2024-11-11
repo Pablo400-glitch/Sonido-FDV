@@ -4,61 +4,36 @@ using UnityEngine;
 
 public class FootstepSounds : MonoBehaviour
 {
-    public AudioSource audioSource;
-    public AudioClip footstepSound;
-
-    public float stepDistance = 1.0f;
-    public float stepCooldown = 0.5f;
-
-    private Vector3 lastPosition;
-    private float lastStepTime = 0.0f;
-    private bool isGrounded = false;
-
-    private void Awake()
-    {
-        lastPosition = transform.position;
-        audioSource = GetComponent<AudioSource>();
-    }
+    public AudioSource footstepsAudio;
+    private bool isGrounded;
 
     private void Update()
     {
-        isGrounded = IsGrounded();
-
-        if (isGrounded && HasMoved())
+        if (isGrounded && (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D)))
         {
-
-            if (Time.time - lastStepTime >= stepCooldown)
+            if (!footstepsAudio.isPlaying)
             {
-                PlayFootstepSound();
-                lastStepTime = Time.time;
+                footstepsAudio.Play();
+            }
+        }
+        else
+        {
+            if (footstepsAudio.isPlaying)
+            {
+                footstepsAudio.Stop();
             }
         }
     }
 
-    private bool HasMoved()
+    private void OnCollisionStay(Collision collision)
     {
-        float distanceMoved = Vector3.Distance(lastPosition, transform.position);
-
-        if (distanceMoved >= stepDistance)
-        {
-            lastPosition = transform.position;
-            return true;
-        }
-
-        return false;
+        if (collision.gameObject.CompareTag("Floor"))
+            isGrounded = true;
     }
 
-    private bool IsGrounded()
+    private void OnCollisionExit(Collision collision)
     {
-        RaycastHit hit;
-        return Physics.Raycast(transform.position, Vector3.down, out hit, 1.1f);
-    }
-
-    private void PlayFootstepSound()
-    {
-        if (audioSource && footstepSound)
-        {
-            audioSource.PlayOneShot(footstepSound);
-        }
+        if (collision.gameObject.CompareTag("Floor"))
+            isGrounded = false;
     }
 }
