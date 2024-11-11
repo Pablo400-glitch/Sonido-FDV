@@ -272,11 +272,11 @@ Cada gameObject de audio tiene su `AudioSource` y a su vez cada `AudioSource` ti
 
 ![Descripción de la imagen](images/9.1.png)
 
-*Figura X: GameObject que contiene los GameObjects con AudioSource*
+*Figura 8: GameObject que contiene los GameObjects con AudioSource*
 
 ![Descripción de la imagen](images/9.2.png)
 
-*Figura X: Grupos del AudioMixer*
+*Figura 9: Grupos del AudioMixer*
 
 En el script de Player Movement añadí los atributos de `AudioSource` para cada audio dentro del grupo de eventos. 
 
@@ -290,7 +290,7 @@ Para el Ambiente y su cambio de sonido lo hice de la siguiente manera. Cree un `
 
 ![Descripción de la imagen](images/9.3.png)
 
-*Figura X: BoxCollider2D para el cambio de clip de Audio*
+*Figura 10: BoxCollider2D para el cambio de clip de Audio*
 
 ```csharp
 public class PlayerMovement : MonoBehaviour
